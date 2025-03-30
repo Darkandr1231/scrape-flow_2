@@ -12,13 +12,14 @@ export async function UpdateWorkflowCron({
     id: string; 
     cron: string;
 }) {
-    const {userId} = auth();
+    const session = await auth();
+    const {userId} = session;
     if (!userId) {
         throw new Error("unauthenticated");
     }
 
     try {
-        const interval = parser.parseExpression(cron, {utc: true});
+        const interval = (parser as any).parseExpression(cron, {utc: true});
         await prisma.workflow.update({
             where: {id, userId},
             data: {

@@ -4,8 +4,10 @@ import React from 'react'
 import Editor from '../../_components/Editor';
 
 async function page({params}:{params:{workflowId: string}}) {
-    const {workflowId} = params;
-    const {userId} = auth();
+    const paramsData = await Promise.resolve(params);
+    const {workflowId} = paramsData;
+    const session = await auth();
+    const {userId} = session;
     if (!userId) return <div>unauthenticated</div>;
 
     const workflow = await prisma.workflow.findUnique({

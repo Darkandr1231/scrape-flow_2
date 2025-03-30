@@ -5,10 +5,13 @@ import { InboxIcon, Loader2Icon } from "lucide-react";
 import { waitFor } from "@/lib/helper/waitFor";
 import ExecutionsTable from "./_components/ExecutionsTable";
 
-export default function ExecutionsPage({params}: {params:{workflowId: string}}) {
+export default async function ExecutionsPage({params}: {params:{workflowId: string}}) {
+    const paramsData = await Promise.resolve(params);
+    const { workflowId } = paramsData;
+
     return (
         <div className="h-full w-full overflow-auto">
-            <Topbar workflowId={params.workflowId} 
+            <Topbar workflowId={workflowId} 
                 hideButtons 
                 title="All runs"
                 subtitle="List of all your workflow runs"
@@ -20,7 +23,7 @@ export default function ExecutionsPage({params}: {params:{workflowId: string}}) 
                     </div>
                 }
             >
-                <ExecutionsTableWrapper workflowId={params.workflowId} />
+                <ExecutionsTableWrapper workflowId={workflowId} />
             </Suspense>
         </div>
     ); 

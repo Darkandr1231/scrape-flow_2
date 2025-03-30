@@ -12,13 +12,14 @@ import ExecutionStatusChart from './_components/ExecutionStatusChart';
 import { GetCreditUsageInPeriod } from '@/actions/analytics/getCreditUsageInperiod';
 import CreditUsageChart from '../billing/_components/CreditUsageChart';
 
-function HomePage({
+async function HomePage({
   searchParams,
 }:{
   searchParams: {month?: string, year?: string};
 }) {
   const currentDate = new Date();
-  const {month, year} = searchParams;
+  const searchParamsData = await Promise.resolve(searchParams);
+  const {month, year} = searchParamsData;
   const period: Period = {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),

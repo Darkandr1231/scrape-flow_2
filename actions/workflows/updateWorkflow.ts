@@ -12,7 +12,8 @@ export async function UpdateWorkflow({
     id: string;
     definition: string;
 }) {
-    const { userId } = auth();
+    const session = await auth();
+    const {userId} = session;
 
     if (!userId) {
         throw new Error("unathenticated")
