@@ -13,35 +13,47 @@ function ExecuteBtn({workflowId}:{workflowId:string}) {
   const generate = useExecutionPlan();
   const {toObject} = useReactFlow();
 
-  const mutation = useMutation({
-    mutationFn: RunWorkflow,
+  const { mutateAsync, isPending } = useMutation({
+    mutationKey: ['execute-workflow', workflowId],
+    mutationFn: async (data: { workflowId: string; flowDefinition: string }) => {
+      try {
+        await RunWorkflow(data);
+      } catch (error: any) {
+        if (error?.message?.includes('NEXT_REDIRECT')) {
+          return;
+        }
+        throw error;
+      }
+    },
     onSuccess: () => {
       toast.success("Execution started", {id: "flow-execution"});
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast.error("Something went wrong", {id: "flow-execution"});
     },
   });
+
+  const handleExecute = async () => {
+    const plan = generate();
+    if (!plan) {
+      return;
+    }
+
+    await mutateAsync({
+      workflowId: workflowId,
+      flowDefinition: JSON.stringify(toObject()),
+    });
+  };
+
   return (
     <Button 
       variant={"outline"} 
       className="flex items-center gap-2" 
-      disabled={mutation.isPending}
-      onClick={() => {
-        const plan = generate();
-        if (!plan) {
-          // Client side validation!
-          return;
-        }
-
-        mutation.mutate({
-          workflowId: workflowId,
-          flowDefinition: JSON.stringify(toObject()),
-        });
-      }}
+      disabled={isPending}
+      onClick={handleExecute}
     >
         <PlayIcon size={16} className="stroke-orange-400" />
-        Execute
+        {isPending ? "Executing..." : "Execute"}
     </Button>
   )
 }

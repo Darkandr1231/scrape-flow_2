@@ -8,32 +8,45 @@ import React from 'react'
 import { toast } from 'sonner';
 
 function RunBtn({workflowId}:{workflowId: string}) {
-    const mutation = useMutation({
-        mutationFn: RunWorkflow,
+    const { mutateAsync, isPending } = useMutation({
+        mutationKey: ['run-workflow', workflowId],
+        mutationFn: async (data: { workflowId: string }) => {
+            try {
+                await RunWorkflow(data);
+            } catch (error: any) {
+                if (error?.message?.includes('NEXT_REDIRECT')) {
+                    return;
+                }
+                throw error;
+            }
+        },
         onSuccess: () => {
             toast.success("Workflow started", {id: workflowId});
         },
         onError: () => {
-            toast.success("Something went wrong", {id: workflowId});
+            toast.error("Something went wrong", {id: workflowId});
         },
     });
-  return (
-    <Button 
-        variant={"outline"} 
-        size={"sm"} 
-        className="flex items-center gap-2" 
-        disabled={mutation.isPending}
-        onClick={() => {
-            toast.loading("Scheduling run...", {id: workflowId});
-            mutation.mutate({
-                workflowId,
-            });
-        }}
-    >
-        <PlayIcon size={16} />
-        Run
-    </Button>
-  );
+
+    const handleRun = async () => {
+        toast.loading("Scheduling run...", {id: workflowId});
+        await mutateAsync({
+            workflowId,
+        });
+    };
+
+    return (
+        <Button 
+            variant={"outline"} 
+            size={"sm"} 
+            className="flex items-center gap-2" 
+            disabled={isPending}
+            onClick={handleRun}
+        >
+            <PlayIcon size={16} />
+            {isPending ? "Running..." : "Run"}
+        </Button>
+    );
 }
 
 export default RunBtn

@@ -53,7 +53,7 @@ function SchedulerDialog(props:{
 
   useEffect(() => {
     try {
-      parser.parseExpression(cron);
+      (parser as any).parseExpression(cron);
       const humanCronStr = cronstrue.toString(cron);
       setValidCron(true);
       setReadableCron(humanCronStr);
