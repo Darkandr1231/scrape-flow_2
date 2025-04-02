@@ -31,27 +31,41 @@ function DuplicateWorkflowDialog({workflowId}:{workflowId?: string}) {
     const form = useForm<duplicateWorkflowSchemaType>({
       resolver: zodResolver(duplicateWorkflowSchema),
       defaultValues: {
-        workflowId,
+        workflowId: workflowId || "",
+        name: "", // Set default empty string for 'name'
+        description: "" // Set default empty string for 'description'
       },
     });
   
-  const {mutate, isPending} = useMutation({
-      mutationFn: DuplicateWorkflow,
+    const { mutate, isPending } = useMutation({
+      mutationFn: async (values: duplicateWorkflowSchemaType) => {
+        try {
+          await DuplicateWorkflow(values);
+        } catch (error: any) {
+          if (error?.message?.includes('NEXT_REDIRECT')) {
+            // Обработка NEXT_REDIRECT (если необходимо)
+            console.warn("NEXT_REDIRECT encountered.");
+            //  Здесь можно добавить логику перенаправления (например, router.push(...))
+            //  Если перенаправление обрабатывается в DuplicateWorkflow, то здесь ничего делать не нужно
+            return; // Прерываем выполнение, т.к. перенаправление - это ожидаемое поведение
+          }
+          throw error; // Перебрасываем ошибку, для обработки в onError
+        }
+      },
       onSuccess: () => {
         toast.success("Workflow duplicated", { id: "duplicate-workflow" });
         setOpen((prev) => !prev);
       },
-      onError: () => {
-        toast.error("Failed to duplicate workflow", { id: "duplicate-workflow" });
+      onError: (error) => { // Добавлен аргумент `error`
+        console.error("Error duplicating workflow:", error);
+        toast.error(`Failed to duplicate workflow: ${error.message || "Unknown error"}`, { id: "duplicate-workflow" });
       },
     });
-
-  const onSubmit = useCallback((values: duplicateWorkflowSchemaType) => {
-    toast.loading("Duplicating workflow...", { id: "duplicate-workflow" })
-    mutate(values);
-  }, 
-  [mutate]
-);
+    
+    const onSubmit = useCallback((values: duplicateWorkflowSchemaType) => {
+      toast.loading("Duplicating workflow...", { id: "duplicate-workflow" });
+      mutate(values);
+    }, [mutate]);
 
   return (
     <Dialog open={open} onOpenChange={open => {

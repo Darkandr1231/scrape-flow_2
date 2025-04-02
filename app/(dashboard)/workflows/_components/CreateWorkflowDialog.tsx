@@ -25,29 +25,45 @@ import { CreateWorkflow } from '@/actions/workflows/createWorkflow';
 import { toast } from 'sonner';
 
 function CreateWorkflowDialog({triggerText}:{triggerText?: string}) {
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-    const form = useForm<createWorkflowSchemaType>({
-      resolver: zodResolver(createWorkflowSchema),
-      defaultValues: {},
-    })
+  const form = useForm<createWorkflowSchemaType>({
+    resolver: zodResolver(createWorkflowSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+  });
+
   
-  const {mutate, isPending} = useMutation({
-      mutationFn: CreateWorkflow,
-      onSuccess: () => {
-        toast.success("Workflow created", { id: "create-workflow" });
-      },
-      onError: () => {
-        toast.error("Failed to create workflow", { id: "create-workflow" });
-      },
-    });
-
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (values: createWorkflowSchemaType) => {
+      try {
+        await CreateWorkflow(values);
+      } catch (error: any) {
+        if (error?.message?.includes('NEXT_REDIRECT')) {
+          // Обработка NEXT_REDIRECT (если необходимо)
+          console.warn("NEXT_REDIRECT encountered.");
+          //  Здесь можно добавить логику перенаправления (например, router.push(...))
+          //  Если перенаправление обрабатывается в CreateWorkflow, то здесь ничего делать не нужно
+          return; // Прерываем выполнение, т.к. перенаправление - это ожидаемое поведение
+        }
+        throw error; // Перебрасываем ошибку, для обработки в onError
+      }
+    },
+    onSuccess: () => {
+      toast.success("Workflow created", { id: "create-workflow" });
+    },
+    onError: (error) => { // Добавлен аргумент `error`
+      console.error("Error creating workflow:", error);
+      toast.error(`Failed to create workflow: ${error.message || "Unknown error"}`, { id: "create-workflow" });
+    },
+  });
+  
   const onSubmit = useCallback((values: createWorkflowSchemaType) => {
-    toast.loading("Creating workflow...", { id: "create-workflow" })
+    toast.loading("Creating workflow...", { id: "create-workflow" });
     mutate(values);
-  }, 
-  [mutate]
-);
+  }, [mutate]);
 
   return (
     <Dialog open={open} onOpenChange={open => {
