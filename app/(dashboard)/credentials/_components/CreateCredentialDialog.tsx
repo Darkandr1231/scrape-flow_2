@@ -31,6 +31,10 @@ function CreateCredentialDialog({triggerText}:{triggerText?: string}) {
 
     const form = useForm<createCredentialSchemaType>({
       resolver: zodResolver(createCredentialSchema),
+      defaultValues: { // Add default values for your form fields
+          name: '',
+          value: ''
+      }
     });
   
   const {mutate, isPending} = useMutation({
