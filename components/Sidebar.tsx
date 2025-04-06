@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation';
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger,  } from '@/components/ui/sheet';
 import UserAvailableCreditsBadge from './UserAvailableCreditsBadge';
-
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 const routes = [
   {
@@ -97,6 +97,7 @@ export function MobileSidebar() {
           </SheetTrigger>
           <SheetContent 
             className="w-screen sm:w-screen space-y-4" side={"left"}>
+              <DialogTitle>Меню</DialogTitle> {/* Добавьте заголовок диалога */}
               <Logo />
               <UserAvailableCreditsBadge />
               <div className="flex flex-col gap-1">
