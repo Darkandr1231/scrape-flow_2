@@ -8,7 +8,6 @@ import { Breadcrumb,
 } from '@/components/ui/breadcrumb';
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import { MobileSidebar } from './Sidebar';
 
 function BreadcrumbHeader() {
     const [pathName, setPathName] = useState<string | null>(null);
@@ -24,7 +23,6 @@ function BreadcrumbHeader() {
 
     return (
         <div className="flex items-center flex-start">
-            <MobileSidebar />
             <Breadcrumb>    
                 <BreadcrumbList>
                     {paths.map((path, index) => (
