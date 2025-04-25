@@ -1,16 +1,44 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import authConfig from "@/auth.config";
+import NextAuth from "next-auth";
+import { NextResponse } from 'next/server';
+import {
+  DEFAULT_LOGIN_REDIRECT,
+  apiAuthPrefix,
+  authRoutes,
+  publicRoutes
 
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)', 
-  '/sign-up(.*)',
-  "/api/workflows/(.*)*",
-  "/api/webhooks/stripe",
-]);
+} from "@/routes"
+ 
+const { auth } = NextAuth(authConfig)
 
-export default clerkMiddleware(async (auth, request) => {
-    if (!isPublicRoute(request)) await auth.protect()
-  })
+export default auth((req) => {
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
 
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+  if (isApiAuthRoute) {
+    return NextResponse.next();
+  }
+
+  if (isAuthRoute){
+    if (isLoggedIn){
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl))
+    }
+    return NextResponse.next();
+  }
+
+
+  if (!isLoggedIn && !isPublicRoute && nextUrl.pathname !== "/auth/redister"){
+    return NextResponse.redirect(new URL('/auth/login', req.url));
+  }
+  return NextResponse.next();
+
+})  
+ 
+// Optionally, don't invoke Middleware on some paths
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
@@ -18,4 +46,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-};
+}
