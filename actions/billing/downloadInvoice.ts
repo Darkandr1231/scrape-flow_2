@@ -2,32 +2,37 @@
 
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe/stripe";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 export async function DownloadInvoice(id: string) {
-    const {userId} = await auth();
-    if (!userId) {
-        throw new Error("unauthenticated");
-    }
+  const session = await auth();
 
-    const purchase = await prisma.userPurchase.findUnique({
-        where: {
-            id,
-            userId,
-        },
-    });
+  if (!session?.user?.id) {
+    throw new Error("unauthenticated");
+  }
 
-    if (!purchase) {
-        throw new Error("bad request");
-    }
+  const purchase = await prisma.userPurchase.findUnique({
+    where: {
+      id,
+      userId: session.user.id,
+    },
+  });
 
-    const session = await stripe.checkout.sessions.retrieve(purchase.stripeId);
+  if (!purchase) {
+    throw new Error("bad request");
+  }
 
-    if (!session.invoice) {
-        throw new Error("invoice not found");
-    }
+  const stripeSession = await stripe.checkout.sessions.retrieve(
+    purchase.stripeId
+  );
 
-    const invoice = await stripe.invoices.retrieve(session.invoice as string);
+  if (!stripeSession.invoice) {
+    throw new Error("invoice not found");
+  }
 
-    return invoice.hosted_invoice_url;
+  const invoice = await stripe.invoices.retrieve(
+    stripeSession.invoice as string
+  );
+
+  return invoice.hosted_invoice_url;
 }
