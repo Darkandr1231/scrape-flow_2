@@ -1,14 +1,16 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth"; 
 
 export async function GetWorkflowPhaseDetails(phaseId: string){
     const session = await auth();
-    const {userId} = session;
-    if (!userId) {
-        throw new Error("unauthenticated");
+
+    if (!session?.user?.id) {
+        throw new Error("unathenticated");
     }
+
+    const userId = session.user.id;
 
     return prisma.executionPhase.findUnique({
         where: {

@@ -4,7 +4,7 @@ import { PeriodToDateRange } from "@/lib/helper/dates";
 import prisma from "@/lib/prisma";
 import { Period } from "@/types/analytics";
 import { WorkflowExecutionStatus } from "@/types/workflow";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth"; 
 import { eachDayOfInterval, format } from "date-fns";
 
 type Stats = Record<
@@ -17,10 +17,12 @@ type Stats = Record<
 
 export async function GetWorkflowExecutionStats(period: Period) {
     const session = await auth();
-    const {userId} = session;
-    if (!userId) {
-        throw new Error("unauthenticated");
+
+    if (!session?.user?.id) {
+        throw new Error("unathenticated");
     }
+
+    const userId = session.user.id;
 
     const dateRange = PeriodToDateRange(period);
     const executions = await prisma.workflowExecution.findMany({

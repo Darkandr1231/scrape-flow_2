@@ -3,14 +3,16 @@
 import { getAppUrl } from "@/lib/helper/appUrl";
 import { stripe } from "@/lib/stripe/stripe";
 import { getCreditsPack, PackId } from "@/types/billing";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth"; 
 import { redirect } from "next/navigation";
 
 export async function PurchaseCredits(packId: PackId) {
-    const {userId} = await auth();
-    if (!userId) {
+    const stripeSession = await auth();
+    if (!stripeSession?.user?.id) {
         throw new Error("unauthenticated");
     }
+
+    const userId = stripeSession.user.id;
 
     const selectedPack = getCreditsPack(packId);
     if(!selectedPack) {
