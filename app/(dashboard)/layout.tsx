@@ -4,7 +4,7 @@ import { ModeToggle } from '@/components/ThemeModeToggle';
 import { Separator } from '@/components/ui/separator'
 import React from 'react'
 import SettingsPage from './(protected)/settings/page';
-
+import { signOut } from '@/auth';
 
 function layout({ children }: { children: React.ReactNode }) {
     return (
@@ -15,6 +15,15 @@ function layout({ children }: { children: React.ReactNode }) {
                     <BreadcrumbHeader />
                     <div className="gap-1 flex items-center">
                         <ModeToggle />
+                        <form action={async () => {
+                            "use server";
+
+                            await signOut();
+                        }}>
+                            <button type="submit">
+                                Sign out
+                            </button>
+                        </form>
                         {/*<SettingsPage />*/}
                     </div>
                 </header>

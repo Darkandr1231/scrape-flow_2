@@ -6,7 +6,7 @@ const SettingsPage = async () => {
     return (
         <div>
             {/*{JSON.stringify(session)}*/}
-            <form action={async () => {
+            {/*<form action={async () => {
                 "use server";
 
                 await signOut();
@@ -14,7 +14,7 @@ const SettingsPage = async () => {
                 <button type="submit">
                     Sign out
                 </button>
-            </form>
+            </form>*/}
         </div>
     );
 }
