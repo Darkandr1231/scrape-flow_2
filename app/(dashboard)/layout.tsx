@@ -15,7 +15,7 @@ function layout({ children }: { children: React.ReactNode }) {
                     <BreadcrumbHeader />
                     <div className="gap-1 flex items-center">
                         <ModeToggle />
-                        <SettingsPage />
+                        {/*<SettingsPage />*/}
                     </div>
                 </header>
                 <Separator />

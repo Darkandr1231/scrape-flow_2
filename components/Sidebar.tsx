@@ -13,7 +13,7 @@ import { DialogTitle } from '@radix-ui/react-dialog';
 
 const routes = [
   {
-    href: "",
+    href: "settings",
     label: "Home",
     icon: HomeIcon,
   },
