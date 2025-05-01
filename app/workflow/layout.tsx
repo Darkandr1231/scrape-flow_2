@@ -1,20 +1,29 @@
+'use client'
+
 import Logo from '@/components/Logo'
 import { ModeToggle } from '@/components/ThemeModeToggle'
 import { Separator } from '@/components/ui/separator'
 import React from 'react'
 
-function layout({children}: {children: React.ReactNode}) {
+function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col w-full h-screen">
-        {children}
-        <Separator />
-        <footer className="flex items-center 
-        justify-between p-2">
-            <Logo iconSize={16} fontSize="text-xl" />
-            <ModeToggle />
-        </footer>
+      {children}
+      <Separator />
+      <footer className="flex items-center justify-between p-2">
+        <span
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          style={{ pointerEvents: 'none' }}
+        >
+          <Logo iconSize={16} fontSize="text-xl" />
+        </span>
+        <ModeToggle />
+      </footer>
     </div>
   )
 }
 
-export default layout
+export default Layout
